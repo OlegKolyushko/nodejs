@@ -47,18 +47,11 @@ const contactsPath = path.join(__dirname, './db/contacts.json') ;
     const newList = await fsPromises.writeFile(contactsPath, newContactListString);
     console.table(newList);
   }
+  
   module.exports = {
     listContacts,
     getContactById,
     removeContact,
     addContact
   };
-
-
-  // async function removeContact(contactId) {
-  //   const data = await listContacts();
-  //   const parsedData = data.filter((el) => el.id !== contactId);
-  //   await fs.promises.writeFile(contactsPath, JSON.stringify(parsedData));
-  //   return parsedData;
-  // }
   
