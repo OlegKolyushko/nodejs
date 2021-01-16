@@ -21,8 +21,7 @@ const contactsPath = path.join(__dirname, './db/contacts.json') ;
     const filteredContact = data.filter((contact) => contact.id !== contactId );
     const filteredContactsList = JSON.stringify(filteredContact);
     await fsPromises.writeFile(contactsPath, filteredContactsList);
-    const newList = await listContacts();
-    console.table(newList);
+    console.table(filteredContact);
   }
   
   async function addContact(name, email, phone) {
@@ -43,8 +42,7 @@ const contactsPath = path.join(__dirname, './db/contacts.json') ;
     const newContactList = [...data, newContact];
     const newContactListString = JSON.stringify(newContactList);
     await fsPromises.writeFile(contactsPath, newContactListString);
-    const newList = await listContacts();
-    console.table(newList);
+    console.table(newContactList);
   }
   
   module.exports = {
