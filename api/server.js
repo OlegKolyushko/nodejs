@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const contactsRouters = require('./contacts/contacts.routers');
 require('dotenv').config();
 
- module.exports = class UserServer {
+ module.exports = class Server {
     constructor() {
         this.server = null;
     }
@@ -20,14 +20,14 @@ require('dotenv').config();
         this.server = express();
     }
 
-    initMiddleware() {
+    initMiddlewares() {
         this.server.use(express.json());
         this.server.use(morgan('dev'));
         this.server.use(cors({origin: 'http://localhost:3000'}));
     }
 
     initRoutes() {
-        this.server.use('/contacts', contactsRouters);
+        this.server.use('/api/contacts', contactsRouters);
     }
 
     startListening() {

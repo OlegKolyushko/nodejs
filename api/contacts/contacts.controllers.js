@@ -1,71 +1,36 @@
-const fs = require("fs");
-const { promises: fsPromises } = fs;
 const path = require("path");
 const Joi = require("joi");
-const { parse } = require("path");
+const contactUtils = require('./contact.utils');
 
 const contactsPath = path.join(__dirname, "../db/contacts.json");
 
 class ContactsControllers {
   async listContacts(req, res, next) {
-    const contacts = await fsPromises.readFile(contactsPath, "utf-8");
+    const contacts = await contactUtils.listContacts();
     res.status(200).send(contacts);
   }
 
   async getById(req, res, next) {
-    const data = await fsPromises.readFile(contactsPath, "utf-8");
-    const parsedData = JSON.parse(data);
     const contactId = parseInt(req.params.id);
-    const findContact = parsedData.find((contact) => contact.id === contactId);
-    res.status(200).json(findContact);
-    if (!findContact) {
-      return res.status(404).json({ message: "Contact not found" });
+    const foundedContact = await contactUtils.getContactById(contactId);
+    res.status(200).send(foundedContact);
+    if (!foundedContact) {
+      return res.status(404).send({ message: "Contact not found" });
     }
   }
 
   async removeContact(req, res, next) {
-    const data = await fsPromises.readFile(contactsPath, "utf-8");
-    const parsedData = JSON.parse(data);
     const contactId = parseInt(req.params.id);
-    const filteredContact = parsedData.filter(
-      (contact) => contact.id !== contactId
-    );
-    const filteredContactsList = JSON.stringify(filteredContact);
-    const newList = await fsPromises.writeFile(
-      contactsPath,
-      filteredContactsList
-    );
-    res.status(200).json({ message: "contact deleted" });
-
-    const findId = parsedData.find((el) => el.id === contactId);
-    if (!findId) {
-      return res.status(404).json({ message: "Not found" });
+    const contact = await contactUtils.getContactById(contactId);
+    contactUtils.removeContact(contactId);
+    res.status(200).send({ message: "contact deleted" });
+    if (!contact) {
+      return res.status(404).send({ message: "Not found" });
     }
   }
 
   async addContact(req, res, next) {
-    const data = await fsPromises.readFile(contactsPath, "utf-8");
-    const parsedData = JSON.parse(data);
-    let biggestId = 0;
-    parsedData.forEach((el) => {
-      if (el.id > biggestId) {
-        biggestId = el.id;
-      }
-    });
-
-    const contactsItem = req.body;
-
-    const newContact = {
-      id: biggestId + 1,
-      ...contactsItem,
-    };
-
-    const newContactList = [...parsedData, newContact];
-    const newContactListString = JSON.stringify(newContactList);
-    const newList = await fsPromises.writeFile(
-      contactsPath,
-      newContactListString
-    );
+    const newContact = await contactUtils.addContact(req.body);
     res.status(201).send(newContact);
   }
 
@@ -73,54 +38,39 @@ class ContactsControllers {
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Missing fields" });
     }
+    const contactId = parseInt(req.params.id);
+    const contact = await contactUtils.getContactById(contactId);
 
-    const data = await fsPromises.readFile(contactsPath, "utf-8");
-    const contacts = JSON.parse(data);
-    const id = parseInt(req.params.id);
-
-    const targetContactIndex = contacts.findIndex(
-      (contact) => contact.id === id
-    );
-    if (targetContactIndex === -1) {
-      return res.status(404).json({ message: "Not found" });
+    if(!contact) {
+      return res.status(404).send({message: 'Contact Not Found'});
     }
 
-    const updatedContact = (contacts[targetContactIndex] = {
-      ...contacts[targetContactIndex],
-      ...req.body,
-    });
-
-    const newContactListString = JSON.stringify(updatedContact);
-    const newList = await fsPromises.writeFile(
-      contactsPath,
-      newContactListString
-    );
-
-    res.status(200).json(updatedContact);
+    const updatedContact = await contactUtils.updateContact(contactId, req.body);
+    res.status(200).send(updatedContact);
   }
 
   validateUpdateContact(req, res, next) {
     const updatedContactRules = Joi.object({
-      name: Joi.string(),
-      email: Joi.string(),
-      phone: Joi.string(),
+      name: Joi.string().min(1).required(),
+      email: Joi.string().email().required(),
+      phone: Joi.string().min(1).required(),
     });
-    const result = Joi.validate(req.body, updatedContactRules);
+    const result = updatedContactRules.validate(req.body);
     if (result.error) {
-      return res.status(400).json({ message: result.error });
+      return res.status(400).send({ message: result.error });
     }
     next();
   }
 
   validateAddedContact(req, res, next) {
     const addedConatactRules = Joi.object({
-      name: Joi.string().required(),
-      email: Joi.string().required(),
-      phone: Joi.string().required(),
+      name: Joi.string().required().min(1).required(),
+      email: Joi.string().required().email().required(),
+      phone: Joi.string().required().min(1).required(),
     });
-    const result = Joi.validate(req.body, addedConatactRules);
+    const result = addedConatactRules.validate(req.body);
     if (result.error) {
-      return res.status(400).json({ message: result.error });
+      return res.status(400).send({ message: result.error });
     }
     next();
   }
