@@ -2,6 +2,7 @@ const Joi = require("joi");
 const contactModel = require("./constacts.models");
 
 class ContactsControllers {
+  
   async listContacts(req, res, next) {
     const contacts = await contactModel.find({});
     res.status(200).send(contacts);
