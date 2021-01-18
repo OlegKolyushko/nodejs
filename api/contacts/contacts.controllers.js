@@ -70,6 +70,7 @@ class ContactsControllers {
       token: Joi.string(),
     });
     const result = addedConatactRules.validate(req.body);
+    
     if (result.error) {
       return res.status(400).json({ message: result.error });
     }
