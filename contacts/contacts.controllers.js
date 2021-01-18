@@ -2,8 +2,6 @@ const path = require("path");
 const Joi = require("joi");
 const contactUtils = require('./contact.utils');
 
-const contactsPath = path.join(__dirname, "../db/contacts.json");
-
 class ContactsControllers {
   async listContacts(req, res, next) {
     const contacts = await contactUtils.listContacts();
@@ -13,20 +11,26 @@ class ContactsControllers {
   async getById(req, res, next) {
     const contactId = parseInt(req.params.id);
     const foundedContact = await contactUtils.getContactById(contactId);
-    res.status(200).send(foundedContact);
+
     if (!foundedContact) {
       return res.status(404).send({ message: "Contact not found" });
     }
+
+    res.status(200).send(foundedContact);
   }
 
   async removeContact(req, res, next) {
     const contactId = parseInt(req.params.id);
     const contact = await contactUtils.getContactById(contactId);
-    contactUtils.removeContact(contactId);
-    res.status(200).send({ message: "contact deleted" });
+
     if (!contact) {
       return res.status(404).send({ message: "Not found" });
     }
+
+    contactUtils.removeContact(contactId);
+
+
+    res.status(200).send({ message: "contact deleted" });
   }
 
   async addContact(req, res, next) {
@@ -51,9 +55,9 @@ class ContactsControllers {
 
   validateUpdateContact(req, res, next) {
     const updatedContactRules = Joi.object({
-      name: Joi.string().min(1).required(),
-      email: Joi.string().email().required(),
-      phone: Joi.string().min(1).required(),
+      name: Joi.string().min(1),
+      email: Joi.string().email(),
+      phone: Joi.string().min(1),
     });
     const result = updatedContactRules.validate(req.body);
     if (result.error) {

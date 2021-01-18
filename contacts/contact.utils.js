@@ -2,7 +2,7 @@ const fs = require('fs');
 const {promises: fsPromises} = fs;
 const path = require('path');
 
-const contactsPath = path.join(__dirname, './db/contacts.json') ;
+const contactsPath = path.join(__dirname, '../db/contacts.json') ;
 
  async function listContacts() {
     const data = await fsPromises.readFile(contactsPath, 'utf-8');
@@ -42,7 +42,7 @@ const contactsPath = path.join(__dirname, './db/contacts.json') ;
     const newContactList = [...data, newContact];
     const newContactListString = JSON.stringify(newContactList);
     await fsPromises.writeFile(contactsPath, newContactListString);
-    return newContactList;
+    return newContact;
   }
 
   async function updateContact(id, data) {
