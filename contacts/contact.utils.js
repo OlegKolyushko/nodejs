@@ -24,7 +24,7 @@ const contactsPath = path.join(__dirname, '../db/contacts.json') ;
     return filteredContact;
   }
   
-  async function addContact(name, email, phone) {
+  async function addContact({name, email, phone}) {
     const data = await listContacts();
     let biggestId = 0;
     data.forEach(el=> {
