@@ -5,7 +5,7 @@ const contactsRouters = require("./contacts/contacts.routers");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-module.exports = class UserServer {
+module.exports = class Server {
   constructor() {
     this.server = null;
   }
@@ -29,7 +29,7 @@ module.exports = class UserServer {
   }
 
   initRoutes() {
-    this.server.use("/contacts", contactsRouters);
+    this.server.use("/api/contacts", contactsRouters);
   }
 
   startListening() {
