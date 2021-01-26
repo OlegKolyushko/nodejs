@@ -23,7 +23,7 @@ module.exports = class Server {
     this.server = express();
   }
 
-  initMiddleware() {
+  initMiddlewares() {
     this.server.use(express.json());
     this.server.use(morgan("dev"));
     this.server.use(cors({ origin: "http://localhost:3000" }));

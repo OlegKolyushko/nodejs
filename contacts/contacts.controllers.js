@@ -8,8 +8,8 @@ class ContactsControllers {
     res.status(200).send(contacts);
   }
 
-  async getById(req, res, next) {
-    const findedContact = await contactModel.findById(req.params.contactId);
+  async getContactById(req, res, next) {
+    const findedContact = await contactModel.findById(req.params.id);
     res.status(200).json(findedContact);
     if (!findedContact) {
       return res.status(404).json({ message: "Contact not found" });
@@ -18,7 +18,7 @@ class ContactsControllers {
 
   async removeContact(req, res, next) {
     const removedContact = await contactModel.findByIdAndDelete(
-      req.params.contactId
+      req.params.id
     );
     res.status(200).json({ message: "contact deleted" });
     if (!removedContact) {
@@ -37,7 +37,7 @@ class ContactsControllers {
     }
 
     const updatedContact = await contactModel.findByIdAndUpdate(
-      req.params.contactId,
+      req.params.id,
       { $set: req.body }
     );
 
@@ -52,6 +52,8 @@ class ContactsControllers {
       name: Joi.string().min(1),
       email: Joi.string().email().min(1),
       phone: Joi.string().min(1),
+      subscription: Joi.string(),
+      password: Joi.string(),
     });
     const result = updatedContactRules.validate(req.body);
     if (result.error) {
@@ -66,7 +68,7 @@ class ContactsControllers {
       email: Joi.string().email().required(),
       phone: Joi.string().required(),
       subscription: Joi.string(),
-      password: Joi.string(),
+      password: Joi.string().required(),
       token: Joi.string(),
     });
     const result = addedConatactRules.validate(req.body);
