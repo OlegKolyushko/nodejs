@@ -26,6 +26,6 @@ async function updateToken(id, newToken) {
   return UserModel.findByIdAndUpdate(id, { token: newToken });
 }
 
-const UserModel = mongoose.model("users", userSchema);
+const UserModel = mongoose.model("User", userSchema);
 
 module.exports = UserModel;
