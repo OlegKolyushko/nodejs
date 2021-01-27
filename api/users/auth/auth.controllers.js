@@ -2,6 +2,7 @@ const Joi = require('joi');
 const userModel = require('../users.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const avatarGenerator = require('../../utils/avatargenerator');
 
 class AuthControllers {
     async createUser (req,res,next) {
@@ -9,22 +10,27 @@ class AuthControllers {
             const {email, password} = req.body;
             const passwordHash = await bcrypt.hash(password, 4);
             const existingUser = await userModel.findUserByEmail(email);
-            if(!existingUser) {
+            if(existingUser) {
                 return res.status(409).send({message: "Email in use"});
             }
+            const avatar = await avatarGenerator();
+            const avatarLink = `http://localhost:3000/images/${avatar}`;
             const {
                 _id: id,
                 email: userEmail,
                 subscription,
                 token,
+                avatarURL,
               } = await userModel.create({
                 email,
                 password: passwordHash,
+                avatarURL: avatarLink,
               });
             return res.status(201).send({
                 user: {
                     email: userEmail,
                     subscription,
+                    avatarURL,
                 }
             })
         } catch (error) {
@@ -67,7 +73,7 @@ class AuthControllers {
     validateCreateUser(req,res,next) {
         const createUserRules = Joi.object({
             email: Joi.string().email().min(1).required(),
-            password: Joi.string.min(6).required(),
+            password: Joi.string().min(6).required(),
         });
         const result = createUserRules.validate(req.body);
 

@@ -25,16 +25,17 @@ module.exports = class Server {
     this.server = express();
   }
 
-  initMiddleware() {
+  initMiddlewares() {
     this.server.use(express.json());
     this.server.use(morgan("dev"));
     this.server.use(cors({ origin: "http://localhost:3000" }));
+    this.server.use(express.static('./public'));
   }
 
   initRoutes() {
     this.server.use("/api/contacts", contactsRouters);
-    this.server.use("api/users", usersRouter);
-    this.server.use("api/auth", authRouters);
+    this.server.use("/api/users", usersRouters);
+    this.server.use("/api/auth", authRouters);
   }
 
   startListening() {
