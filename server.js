@@ -1,11 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const contactsRouters = require("./contacts/contacts.routers");
-const usersRouters = require('./users/users.routes');
-const authRouters = require('./users/auth/auth.routers');
+const contactsRouters = require("./api/contacts/contacts.routers");
+const usersRouters = require('./api/users/users.routes');
+const authRouters = require('./api/users/auth/auth.routers');
 const mongoose = require("mongoose");
-const usersRouter = require("./users/users.routes");
 require("dotenv").config();
 
 module.exports = class Server {
