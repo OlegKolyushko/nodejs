@@ -1,13 +1,15 @@
 const userModel = require('../users/users.model');
 const {UnauthorizationError} = require('../helpers/errors.constructors');
+const jwt = require('jsonwebtoken');
 
 exports.authorize = async function (req, res,next) {
     try {
         const authorixationHeader = req.get('Authorization');
-        const token = authorixationHeader.replace("Bearer ", "");
+        const [,token] = authorizationHeader.split(' ');
+        // const token = authorixationHeader.replace("Bearer ", "");
         let userId;
         try {
-            const userId = await jwt.verify(token, process.env.JWT_SECRET).id;
+             userId = await jwt.verify(token, process.env.JWT_SECRET).id;
         } catch (error) {
             next(new UnauthorizationError("User not authorizated"));
         }

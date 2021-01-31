@@ -1,8 +1,5 @@
-const { required } = require("joi");
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 
 const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
