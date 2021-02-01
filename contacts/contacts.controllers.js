@@ -1,80 +1,100 @@
-const path = require("path");
 const Joi = require("joi");
-const contactUtils = require('./contact.utils');
+const contactModel = require("./constacts.models");
 
 class ContactsControllers {
   async listContacts(req, res, next) {
-    const contacts = await contactUtils.listContacts();
-    res.status(200).send(contacts);
+    try {
+      const contacts = await contactModel.find({});
+      res.status(200).send(contacts);
+    } catch (error) {
+      next(error);
+    }
   }
 
-  async getById(req, res, next) {
-    const contactId = parseInt(req.params.id);
-    const foundedContact = await contactUtils.getContactById(contactId);
-
-    if (!foundedContact) {
-      return res.status(404).send({ message: "Contact not found" });
+  async getContactById(req, res, next) {
+    try {
+      const findedContact = await contactModel.findById(req.params.id);
+      if (!findedContact) {
+        return res.status(404).json({ message: "Contact not found" });
+      }
+      res.status(200).json(findedContact);
+    } catch (error) {
+      next(error);
     }
-
-    res.status(200).send(foundedContact);
   }
 
   async removeContact(req, res, next) {
-    const contactId = parseInt(req.params.id);
-    const contact = await contactUtils.getContactById(contactId);
-
-    if (!contact) {
-      return res.status(404).send({ message: "Not found" });
+    try {
+      const removedContact = await contactModel.findByIdAndDelete(
+        req.params.id
+      );
+      if (!removedContact) {
+        return res.status(404).json({ message: "Not found" });
+      }
+      res.status(200).json({ message: "contact deleted" });
+    } catch (error) {
+      next(error);
     }
-
-    contactUtils.removeContact(contactId);
-
-
-    res.status(200).send({ message: "contact deleted" });
   }
 
   async addContact(req, res, next) {
-    const newContact = await contactUtils.addContact(req.body);
-    res.status(201).send(newContact);
+    try {
+      const addedContact = await contactModel.create(req.body);
+      res.status(201).send(addedContact);
+    } catch (error) {
+      next(error);
+    }
   }
 
   async updateContact(req, res, next) {
-    if (Object.keys(req.body).length === 0) {
-      return res.status(400).json({ message: "Missing fields" });
-    }
-    const contactId = parseInt(req.params.id);
-    const contact = await contactUtils.getContactById(contactId);
+    try {
+      if (Object.keys(req.body).length === 0) {
+        return res.status(400).json({ message: "Missing fields" });
+      }
 
-    if(!contact) {
-      return res.status(404).send({message: 'Contact Not Found'});
-    }
+      const updatedContact = await contactModel.findByIdAndUpdate(
+        req.params.id,
+        { $set: req.body },
+        { new: true }
+      );
 
-    const updatedContact = await contactUtils.updateContact(contactId, req.body);
-    res.status(200).send(updatedContact);
+      if (!updatedContact) {
+        return res.status(400).json({ message: "Not found" });
+      }
+      res.status(200).json(updatedContact);
+    } catch (error) {
+      next(error);
+    }
   }
 
   validateUpdateContact(req, res, next) {
     const updatedContactRules = Joi.object({
       name: Joi.string().min(1),
-      email: Joi.string().email(),
+      email: Joi.string().email().min(1),
       phone: Joi.string().min(1),
+      subscription: Joi.string(),
+      password: Joi.string(),
     });
     const result = updatedContactRules.validate(req.body);
     if (result.error) {
-      return res.status(400).send({ message: result.error });
+      return res.status(400).json({ message: result.error });
     }
     next();
   }
 
   validateAddedContact(req, res, next) {
     const addedConatactRules = Joi.object({
-      name: Joi.string().required().min(1).required(),
-      email: Joi.string().required().email().required(),
-      phone: Joi.string().required().min(1).required(),
+      name: Joi.string().required(),
+      email: Joi.string().email().required(),
+      phone: Joi.string().required(),
+      subscription: Joi.string(),
+      password: Joi.string().required(),
+      token: Joi.string(),
     });
     const result = addedConatactRules.validate(req.body);
+
     if (result.error) {
-      return res.status(400).send({ message: result.error });
+      return res.status(400).json({ message: result.error });
     }
     next();
   }

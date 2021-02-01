@@ -1,38 +1,56 @@
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const contactsRouters = require('./contacts/contacts.routers');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const contactsRouters = require("./contacts/contacts.routers");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
- module.exports = class Server {
-    constructor() {
-        this.server = null;
-    }
 
-    start() {
-        this.initServer();
-        this.initMiddlewares();
-        this.initRoutes();
-        this.startListening();
-    }
+module.exports = class Server {
+  constructor() {
+    this.server = null;
+  }
 
-    initServer() {
-        this.server = express();
-    }
+  async start() {
+    this.initServer();
+    this.initMiddlewares();
+    this.initRoutes();
+    await this.initDB();
+    this.startListening();
+  }
 
-    initMiddlewares() {
-        this.server.use(express.json());
-        this.server.use(morgan('dev'));
-        this.server.use(cors({origin: 'http://localhost:3000'}));
-    }
+  initServer() {
+    this.server = express();
+  }
 
-    initRoutes() {
-        this.server.use('/api/contacts', contactsRouters);
-    }
+  initMiddlewares() {
+    this.server.use(express.json());
+    this.server.use(morgan("dev"));
+    this.server.use(cors({ origin: "http://localhost:3000" }));
+  }
 
-    startListening() {
-        this.server.listen(process.env.PORT, () => {
-            console.log('Server started listening on port:', process.env.PORT)
-        })
+  initRoutes() {
+    this.server.use("/api/contacts", contactsRouters);
+  }
+
+  startListening() {
+    this.server.listen(process.env.PORT, () => {
+      console.log("Server started listening on port:", process.env.PORT);
+    });
+  }
+
+  async initDB() {
+    try {
+      await mongoose.connect(process.env.MONGODB_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false,
+        useCreateIndex: true,
+      });
+      console.log("Database connection successful");
+    } catch (error) {
+      console.log(error);
+      process.exit(1);
     }
-}
+  }
+};

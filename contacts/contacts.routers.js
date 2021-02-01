@@ -5,7 +5,7 @@ const contactsRouters = Router();
 
 contactsRouters.get("/", contactsControllers.listContacts);
 
-contactsRouters.get("/:id", contactsControllers.getById);
+contactsRouters.get("/:id", contactsControllers.getContactById);
 
 contactsRouters.delete("/:id", contactsControllers.removeContact);
 
