@@ -1,5 +1,6 @@
 {
-  "name": "02-express",
+
+  "name": "nodejs",
   "version": "1.0.0",
   "description": "",
   "main": "start.js",
