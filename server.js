@@ -32,8 +32,8 @@ module.exports = class Server {
 
   initRoutes() {
     this.server.use("/api/contacts", contactsRouters);
-    this.server.use("api/users", usersRouters);
-    this.server.use("api/auth", authRouters);
+    this.server.use("/api/users", usersRouters);
+    this.server.use("/api/auth", authRouters);
   }
 
   startListening() {

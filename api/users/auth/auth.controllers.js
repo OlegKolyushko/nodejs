@@ -7,16 +7,14 @@ class AuthControllers {
     async createUser (req,res,next) {
         try {
             const {email, password} = req.body;
-            const passwordHash = await bcrypt.hash(password, 4);
             const existingUser = await userModel.findUserByEmail(email);
-            if(!existingUser) {
+            if(existingUser) {
                 return res.status(409).send({message: "Email in use"});
             }
+            const passwordHash = await userModel.passwordHash(password);
             const {
-                _id: id,
                 email: userEmail,
                 subscription,
-                token,
               } = await userModel.create({
                 email,
                 password: passwordHash,
@@ -39,16 +37,15 @@ class AuthControllers {
             if(!user) {
                 return res.status(401).send('Authenticaction failed');
             }
-            const validPassword = await bcrypt.compare(password, user.password);
-            if(!validPassword) {
-                return res.status(401).send('Authenticaction failed');
-            }
-            const token = await jwt.sign({id: user._id}, process.env.JWT_SECRET, {
-                expiresIn: 2 * 24 * 60 * 60,
-            });
-            await userModel.updateToken(user._id, token);
-            return res.status(200).json({token});
-
+            const validUser = await user.validUser(password);
+            res.status(200).send({
+                validUser,
+                user:{
+                    id: user._id,
+                    email: user.email,
+                    subscription: user.subscription,
+                }
+            })
         } catch (error) {
             next(error);
         }
@@ -64,10 +61,10 @@ class AuthControllers {
         }
     }
 
-    validateCreateUser(req,res,next) {
+    validateUser(req,res,next) {
         const createUserRules = Joi.object({
             email: Joi.string().email().min(1).required(),
-            password: Joi.string.min(6).required(),
+            password: Joi.string().min(6).required(),
         });
         const result = createUserRules.validate(req.body);
 
