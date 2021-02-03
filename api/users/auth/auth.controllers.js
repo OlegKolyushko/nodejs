@@ -1,7 +1,5 @@
 const Joi = require('joi');
 const userModel = require('../users.model');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 
 class AuthControllers {
     async createUser (req,res,next) {
@@ -11,7 +9,7 @@ class AuthControllers {
             if(existingUser) {
                 return res.status(409).send({message: "Email in use"});
             }
-            const passwordHash = await userModel.passwordHash(password);
+            const passwordHash = await userModel.hashPassword(password);
             const {
                 email: userEmail,
                 subscription,
@@ -37,9 +35,9 @@ class AuthControllers {
             if(!user) {
                 return res.status(401).send('Authenticaction failed');
             }
-            const validUser = await user.validUser(password);
+            const token = await user.validUser(password);
             res.status(200).send({
-                validUser,
+                token,
                 user:{
                     id: user._id,
                     email: user.email,
@@ -54,7 +52,7 @@ class AuthControllers {
     async logout(req,res,next) {
         try {
             const user = req.user;
-            await userModel.updateToken(user._id, null);
+            await user.updateToken(null);
             return res.status(204).send();
         } catch (error) {
             next(error);

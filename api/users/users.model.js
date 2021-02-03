@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 
 const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
@@ -16,7 +17,7 @@ const userSchema = new Schema({
 userSchema.statics.findUserByEmail = findUserByEmail;
 userSchema.methods.updateToken = updateToken;
 userSchema.statics.hashPassword = hashPassword;
-userSchema.methods.checkUser = validUser;
+userSchema.methods.validUser = validUser;
 
 async function findUserByEmail(email) {
   return this.findOne({ email });
@@ -32,7 +33,7 @@ function hashPassword(password) {
 
 async function validUser(password) {
 
-  const validPassword = await bcryptjs.compare(password, this.password);
+  const validPassword = await bcrypt.compare(password, this.password);
 
   if (!validPassword) {
     return res.status(401).send("Authenticaction failed");
