@@ -1,10 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const contactsRouters = require("./contacts/contacts.routers");
+const contactsRouters = require("./api/contacts/contacts.routers");
+const usersRouters = require('./api/users/users.routes');
+const authRouters = require('./api/users/auth/auth.routers');
 const mongoose = require("mongoose");
 require("dotenv").config();
-
 
 module.exports = class Server {
   constructor() {
@@ -31,6 +32,8 @@ module.exports = class Server {
 
   initRoutes() {
     this.server.use("/api/contacts", contactsRouters);
+    this.server.use("/api/users", usersRouters);
+    this.server.use("/api/auth", authRouters);
   }
 
   startListening() {
