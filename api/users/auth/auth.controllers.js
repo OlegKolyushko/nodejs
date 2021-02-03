@@ -3,6 +3,8 @@ const userModel = require('../users.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const avatarGenerator = require('../../utils/avatargenerator');
+const uuid = require('uuid');
+const sendEmail = require('../../utils/sendEmail');
 
 class AuthControllers {
     async createUser (req,res,next) {
@@ -26,6 +28,13 @@ class AuthControllers {
                 password: passwordHash,
                 avatarURL: avatarLink,
               });
+
+              const verificationToken = uuid.v4();
+
+              await user.createVerificationToken(verificationToken);
+
+              await sendEmail(user.email, verificationToken);
+
             return res.status(201).send({
                 user: {
                     email: userEmail,
@@ -65,6 +74,20 @@ class AuthControllers {
             const user = req.user;
             await userModel.updateToken(user._id, null);
             return res.status(204).send();
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async verifyEmail(req,res,next) {
+        try {
+            const {verificationToken} = req.params;
+            const userToVerify = await userModel.findByVerificationToken(verificationToken);
+            if(!userToVerify) {
+                return res.send(404).send("User not found");
+            }
+            await userModel.verifyUser(userToVerify);
+            return res.status(200).send('Verified');
         } catch (error) {
             next(error);
         }

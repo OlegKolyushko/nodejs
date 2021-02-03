@@ -1,4 +1,4 @@
-const { required } = require("joi");
+const { required, func } = require("joi");
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const jwt = require("jsonwebtoken");
@@ -14,17 +14,40 @@ const userSchema = new Schema({
     default: "free",
   },
   token: { type: String, default: "" },
+  verificationToken: {type: String, required: false},
 });
 
 userSchema.statics.findUserByEmail = findUserByEmail;
-userSchema.statics.updateToken = updateToken;
+userSchema.methods.updateToken = updateToken;
+userSchema.methods.createVerificationToken = createVerificationToken;
+userSchema.statics.findByVerificationToken = findByVerificationToken;
+userSchema.statics.verifyUser = verifyUser;
 
 async function findUserByEmail(email) {
   return this.findOne({ email });
 }
 
-async function updateToken(id, newToken) {
-  return UserModel.findByIdAndUpdate(id, { token: newToken });
+async function updateToken(this._id, newToken) {
+  return UserModel.findByIdAndUpdate(this._id, { token: newToken });
+}
+
+async function createVerificationToken(verificationToken) {
+  return UserModel.findByIdAndUpdate(this._id, 
+    { verificationToken },
+  { new: true }
+  );
+}
+
+async function findByVerificationToken(verificationToken) {
+  return this.findOne({verificationToken});
+}
+
+async function verifyUser() {
+  return this.findByIdAndUpdate(
+    this.id,
+    {verificationToken: null},
+    {new: true}
+  )
 }
 
 const UserModel = mongoose.model("User", userSchema);
