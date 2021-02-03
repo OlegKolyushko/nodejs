@@ -19,7 +19,6 @@ exports.authorize = async function (req, res,next) {
             throw new UnauthorizationError();
         }
         req.user = user;
-        req.token = token;
         next();
     } catch (error) {
         next(error);

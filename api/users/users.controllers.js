@@ -1,5 +1,3 @@
-const Joi = require("joi");
-const jwt = require("jsonwebtoken");
 const usersModel = require("./users.model");
 
 class UserController {

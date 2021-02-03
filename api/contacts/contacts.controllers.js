@@ -55,7 +55,7 @@ class ContactsControllers {
       const updatedContact = await contactModel.findByIdAndUpdate(
         req.params.id,
         { $set: req.body },
-        { $new: true }
+        { new: true }
       );
 
       if (!updatedContact) {

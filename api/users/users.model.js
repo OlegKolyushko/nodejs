@@ -1,4 +1,3 @@
-const { required } = require("joi");
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const jwt = require("jsonwebtoken");
@@ -17,7 +16,9 @@ const userSchema = new Schema({
 });
 
 userSchema.statics.findUserByEmail = findUserByEmail;
-userSchema.statics.updateToken = updateToken;
+userSchema.methods.updateToken = updateToken;
+userSchema.statics.hashPassword = hashPassword;
+userSchema.methods.validUser = validUser;
 
 async function findUserByEmail(email) {
   return this.findOne({ email });
@@ -25,6 +26,27 @@ async function findUserByEmail(email) {
 
 async function updateToken(id, newToken) {
   return UserModel.findByIdAndUpdate(id, { token: newToken });
+}
+
+function hashPassword(password) {
+  return bcrypt.hash(password, 4);
+}
+
+async function validUser(password) {
+
+  const validPassword = await bcrypt.compare(password, this.password);
+
+  if (!validPassword) {
+    return res.status(401).send("Authenticaction failed");
+  }
+
+  const token = jwt.sign({ id: this.id }, process.env.JWT_SECRET, {
+    expiresIn: 2 * 24 * 60 * 60,
+  });
+
+  await this.updateToken(token);
+
+  return token;
 }
 
 const UserModel = mongoose.model("User", userSchema);
