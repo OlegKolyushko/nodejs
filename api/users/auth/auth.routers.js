@@ -6,13 +6,13 @@ const authRouters = Router();
 
 authRouters.post(
   "/register",
-  authControllers.validateCreateUser,
+  authControllers.validateUser,
   authControllers.createUser
 );
 
 authRouters.post(
   "/login",
-  authControllers.validateCreateUser,
+  authControllers.validateUser,
   authControllers.login
 );
 

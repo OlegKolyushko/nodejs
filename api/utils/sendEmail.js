@@ -1,23 +1,20 @@
 const nodemailer = require("nodemailer");
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.NODEMAILER_EMAIL,
-    pass: process.env.NODEMAILER_PASSWORD,
-  },
-});
+async function sendEmail(recipient, verificationToken) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.NODEMAILER_EMAIL,
+      pass: process.env.NODEMAILER_PASSWORD,
+    },
+  });
 
-const mailOptions = {
-  from: process.env.NODEMAILER_EMAIL,
-  to: "oleg.kolyushko@gmail.com",
-  subject: "Email verification",
-  html: 'verify',
-};
-
-async function main(params) {
-    const result = await transporter.sendMail(mailOptions);
-    return result;
+  await transporter.sendMail({
+    from: process.env.NODEMAILER_EMAIL,
+    to: recipient,
+    subject: "Email verification",
+    html: `<a href='http://localhost:3000/api/auth/verify/${verificationToken}'>Click to verify</a>`,
+  })
 }
 
-module.exports = main();
+module.exports = sendEmail;
