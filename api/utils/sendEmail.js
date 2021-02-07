@@ -13,7 +13,7 @@ async function sendEmail(recipient, verificationToken) {
     from: process.env.NODEMAILER_EMAIL,
     to: recipient,
     subject: "Email verification",
-    html: `<a href='http://localhost:3000/api/auth/verify/${verificationToken}'>Click to verify</a>`,
+    html: `<a href='http://localhost:${process.env.PORT}/api/auth/verify/${verificationToken}'>Click to verify</a>`,
   })
 }
 

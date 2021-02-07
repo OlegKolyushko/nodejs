@@ -16,7 +16,7 @@ class AuthControllers {
             }
             const passwordHash = await userModel.hashPassword(password);
             const avatar = await avatarGenerator();
-            const avatarLink = `http://localhost:3000/images/${avatar}`;
+            const avatarLink = `http://localhost:${process.env.PORT}/images/${avatar}`;
            const user = await userModel.create({
                 email,
                 password: passwordHash,
