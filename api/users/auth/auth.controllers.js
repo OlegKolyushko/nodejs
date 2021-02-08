@@ -1,7 +1,5 @@
 const Joi = require('joi');
 const userModel = require('../users.model');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const avatarGenerator = require('../../utils/avatargenerator');
 const uuid = require('uuid');
 const sendEmail = require('../../utils/sendEmail');
@@ -40,6 +38,7 @@ class AuthControllers {
             next(error);
         }
     }
+  
 
     async login (req,res,next) {
         try {
@@ -62,16 +61,17 @@ class AuthControllers {
             next(error);
         }
     }
-    
-    async logout(req,res,next) {
-        try {
-            const user = req.user;
-            await userModel.updateToken(user._id, null);
-            return res.status(204).send();
-        } catch (error) {
-            next(error);
-        }
+  
+
+  async logout(req, res, next) {
+    try {
+      const user = req.user;
+      await user.updateToken(user._id, null);
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
     }
+  }
 
     async verifyEmail(req,res,next) {
         try {
@@ -94,11 +94,11 @@ class AuthControllers {
         });
         const result = createUserRules.validate(req.body);
 
-        if(result.error) {
-        return res.status(400).json({ message: result.error });
-        }
-        next();
+    if (result.error) {
+      return res.status(400).json({ message: result.error });
     }
+    next();
+  }
 }
 
 module.exports = new AuthControllers();
