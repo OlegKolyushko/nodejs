@@ -13,12 +13,16 @@ const userSchema = new Schema({
     default: "free",
   },
   token: { type: String, default: "" },
+  verificationToken: {type: String, required: false},
 });
 
 userSchema.statics.findUserByEmail = findUserByEmail;
 userSchema.methods.updateToken = updateToken;
 userSchema.statics.hashPassword = hashPassword;
 userSchema.methods.validUser = validUser;
+userSchema.methods.createVerificationToken = createVerificationToken;
+userSchema.statics.findByVerificationToken = findByVerificationToken;
+userSchema.methods.verifyUser = verifyUser;
 
 async function findUserByEmail(email) {
   return this.findOne({ email });
@@ -49,25 +53,24 @@ async function validUser(password) {
   return token;
 }
 
-function hashPassword(password) {
-  return bcrypt.hash(password, 4);
+
+async function createVerificationToken(verificationToken) {
+  return UserModel.findByIdAndUpdate(this._id, 
+    { verificationToken },
+  { new: true }
+  );
 }
 
-async function validUser(password) {
+async function findByVerificationToken(verificationToken) {
+  return this.findOne({verificationToken});
+}
 
-  const validPassword = await bcrypt.compare(password, this.password);
-
-  if (!validPassword) {
-    return res.status(401).send("Authenticaction failed");
-  }
-
-  const token = jwt.sign({ id: this.id }, process.env.JWT_SECRET, {
-    expiresIn: 2 * 24 * 60 * 60,
-  });
-
-  await this.updateToken(token);
-
-  return token;
+async function verifyUser() {
+  return UserModel.findByIdAndUpdate(
+    this._id,
+    {verificationToken: null},
+    {new: true}
+  )
 }
 
 const UserModel = mongoose.model("User", userSchema);
